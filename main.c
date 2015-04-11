@@ -19,6 +19,62 @@ struct times {
 
 /******** FUNCTIONS ********/
 
+// get the wait time
+void get_wait_time(struct times ** list){
+
+	printf("\n");
+	printf("Computing Wait times\n\n");
+	printf("\n");
+	
+	struct times * temp;
+	temp = *list;
+	int processCounter = 1;
+	int startTime = 0;
+	
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+		while(temp->next != 0){
+			if(startTime == 0){
+				printf("P%d\t\t%d\n", processCounter, startTime);
+				startTime = temp->value;
+			}else {
+				printf("P%d\t\t%d\n", processCounter, startTime);
+				startTime = startTime + temp->value;
+			}
+			temp = temp->next;
+			processCounter++;
+		}
+		printf("P%d\t\t%d\n", processCounter, startTime);
+	}
+}
+
+// get average turn around time
+
+void get_turn_around(struct times ** list){
+
+	printf("\n");
+	printf("Computing Turn around times\n\n");
+	printf("\n");
+	
+	struct times * temp;
+	temp = *list;
+	int processCounter = 1;
+	int startTime = 0;
+	
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+		while(temp->next != 0){
+			startTime = startTime + temp->value;
+			printf("P%d\t\t%d\n", processCounter, startTime);
+			temp = temp->next;
+			processCounter++;
+		}
+		printf("P%d\t\t%d\n", processCounter, startTime);
+	}
+	
+}
 
 // outputs the values based on the Round Robin values (RR)
 
@@ -49,18 +105,78 @@ void rr_algorithm(struct times ** list){
 // outputs the values based on the FCFS algorithm
 
 void fcfs_algorithm(struct times ** list){
-	printf("FCFS \n");	
+
+	printf("\n");
+	printf("************* FIRST COME FIRST SERVED (FCFS) *************\n\n");
+	printf("Scheduled Jobs\n\n");
+	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
+
+	struct times * temp;
+	temp = *list;
+	int processCounter = 1;
+	int startTime = 0;
+	int stopTime = 0;
+	
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+		while(temp->next != 0){
+			if(startTime == 0){
+				printf("P%d\t\t\t%d\t\t\t\t\%d\t\t\t\t%d\n", processCounter, temp->value, startTime, stopTime);
+				stopTime = temp->value;
+				startTime = temp->value;
+			}else {
+				stopTime = stopTime + temp->value;
+				printf("P%d\t\t\t%d\t\t\t\t\%d\t\t\t\t%d\n", processCounter, temp->value, startTime, stopTime);
+				startTime = stopTime;
+			}
+			temp = temp->next;
+			processCounter++;
+		}
+		stopTime = stopTime + temp->value;
+		printf("P%d\t\t\t%d\t\t\t\t\%d\t\t\t\t%d\n", processCounter, temp->value, startTime, stopTime);
+	}
+	get_wait_time(list);
+	get_turn_around(list);
+	printf("\n");
 }
 
 // outputs the values based on the SJF algorithm
 
 void sjf_algorithm(struct times ** list){
-	printf("SJF \n");
+
+	printf("\n");
+	printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
+	printf("Scheduled Jobs\n\n");
+	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
+
+	struct times * temp;
+	temp = *list;
+	int processCounter = 1;
+	int startTime = 0;
+	int stopTime = 0;
+	
+	if(temp == 0){
+		
+		
+	}else {
+		
+	}
+	
+
+	
+	printf("\n");
 }
 
 //outputs the values based on the SRT algorithm
 void srt_algorithm(struct times ** list){
-	printf("SRT \n");	
+	printf("\n");
+	printf("Scheduled Jobs\n\n");
+	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
+	
+	
+	
+	printf("\n");
 }
 
 // outputs list - more of a sanity check to ensure list values are present
