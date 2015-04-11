@@ -12,46 +12,60 @@
 #include <stdio.h>
 #include <string.h>
 
-
-struct times;
-typedef struct times * burstNode;
-
 struct times {
 	int value;
-	burstNode next;
+	struct times * next;
 };
 
 /******** FUNCTIONS ********/
 
 // outputs list
 
-void output_list(burstNode list){
+void output_list(struct times * list){
 	
-	burstNode cur = list;
-
-	while(cur->next != NULL){
-		printf("value: %d \n", cur->value);
-		cur = cur->next;
+	struct times * cur = list;
+	if(list != 0){
+		printf("test");
+		while(cur->next != 0){
+			printf("value: %d \n", cur->value);
+			cur = cur->next;
+		}
+		printf("value: %d", cur->value);
+	}else {
+		printf("No Values");
 	}
-		printf("value: ", cur->value);
 }
 
 
 // get the burst times from the user
 
-void add_burst_time(burstNode list, int new_time){
+void add_burst_time(struct times * list, int new_time){
 	
-	burstNode temp;
-	temp = (struct times *) malloc( sizeof(struct times) );
+	printf("test");
+	
+	struct times * temp;
+	struct times * cur;
+	temp = (struct times *) malloc( sizeof(struct times) );	
 	temp->value = new_time;
-	temp->next = NULL;
+	temp->next = 0;	
 	
-	burstNode cur = list;
-	while(cur->next != NULL){
-		cur = cur->next;
+	if(temp == 0){
+		printf("Out of memory from adding to list");
+		return;
+	}else {
+
+		if(list == 0){
+			list = temp;
+		}else {
+printf("tst");
+			while(cur->next != 0){
+				cur = cur->next;
+			}
+			cur->next = temp;
+			temp = list;
+		}
+
 	}
-	cur->next = temp;
-	temp = list;
 }
 
 
@@ -88,23 +102,30 @@ int main(){
 	int quanta = 0;
 	int check = 0;
 	int timeRetrieve = 1;
-	int * burstTimes = NULL;
+	int tempNum = 0;
+	struct times * burstList = 0;
 		
 	printf("Welcome to the Job Scheduler Computer.\nWhat algorithm would you like to use\n");
 	scanf("%s", algor);
 	
 	check = get_algorithm(algor);
-	if(check){
-		
+
+	if(check){		
 		// check if algorithm is round robin (RR)
 		
 		if(check == 4){
-			printf("What is the time quanta for %s scheduling\n", algor);
 			while(timeRetrieve == 1){
-				
-			
+				printf("What is the time quanta for %s scheduling\n", algor);
+				scanf("%d", &tempNum);
+ 				if(tempNum > 0){
+ 					add_burst_time(burstList, tempNum);
+ 				}else {
+ 					printf("Input terminated\n");
+ 					timeRetrieve = 0;
+ 				}
+
 			}
-			//get_burst_times();
+//			output_list(burstList);
 		}else {
 		
 		}
