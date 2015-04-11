@@ -103,14 +103,14 @@ int get_algorithm(const char * userSelect){
 int main(){
 
 	char algor[10];
+	// value for quanta - RR only
 	int quanta = 0;
 	int check = 0;
 	int timeRetrieve = 1;
 	int tempNum = 0;
+	int processCount = 1;
 	struct times * burstList = 0;
-	char endof;
-	int c;
-		
+
 	printf("Welcome to the Job Scheduler Computer.\nWhat algorithm would you like to use\n");
 	scanf("%s", algor);
 	
@@ -118,21 +118,25 @@ int main(){
 
 	if(check){		
 		// check if algorithm is round robin (RR)
-		if(check == 4){
-			while(timeRetrieve == 1){
-				printf("What is the time quanta for %s scheduling\n", algor);
-				scanf("%d", &tempNum);				
-				if (!feof(stdin)){
- 					add_burst_time(&burstList, tempNum);
- 				}else {
- 					printf("Input terminated\n");
- 					timeRetrieve = 0;
- 				}
-			}
-			output_list(&burstList);
-		}else {
-		
+		if(check == 4){		
+			printf("What is the time quanta for %s scheduling\n", algor);
+			scanf("%d", &quanta);
 		}
+		
+		while(timeRetrieve == 1){
+			printf("Process %d (P%d) – What is the burst time?\n",processCount, processCount);
+			
+			scanf("%d", &tempNum);
+			if (!feof(stdin)){
+				add_burst_time(&burstList, tempNum);
+			}else {
+				printf("Input terminated\n");
+				timeRetrieve = 0;
+			}
+			processCount++;
+		}
+		output_list(&burstList);
+
 	}else {
 		printf("You didn't enter a valid algorithm. Process terminated!\n");		
 	}
