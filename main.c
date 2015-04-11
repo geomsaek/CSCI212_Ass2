@@ -19,16 +19,49 @@ struct times {
 
 /******** FUNCTIONS ********/
 
+
 // outputs the values based on the Round Robin values (RR)
 
-void round_robin(struct times ** list){
+void rr_algorithm(struct times ** list){
 	
+	printf("\n");
+	printf("Scheduled Jobs\n\n");
+	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 	
-
-
+	struct times * temp;
+	temp = *list;
+	int processCounter = 1;
+	
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+		while(temp->next != 0){
+			printf("P%d\t\t\t%d\t\t\t0\t\t\t%d\n", processCounter, temp->value, temp->value);
+			temp = temp->next;
+			processCounter++;
+		}
+		printf("%d\n", temp->value);
+	}
+		
+	printf("\n");
 }
 
+// outputs the values based on the FCFS algorithm
 
+void fcfs_algorithm(struct times ** list){
+	printf("FCFS \n");	
+}
+
+// outputs the values based on the SJF algorithm
+
+void sjf_algorithm(struct times ** list){
+	printf("SJF \n");
+}
+
+//outputs the values based on the SRT algorithm
+void srt_algorithm(struct times ** list){
+	printf("SRT \n");	
+}
 
 // outputs list - more of a sanity check to ensure list values are present
 void output_list(struct times ** list){
@@ -96,6 +129,40 @@ int get_algorithm(const char * userSelect){
 	}
 }
 
+// 1 - FCFS
+// 2 - SJF
+// 3 - SRT
+// 4 - RR
+
+// select the correct algorithm
+void output_algorithm(struct times ** list, int choice){
+	
+	switch(choice){
+	
+		case 1:
+			// FCFS
+			fcfs_algorithm(list);
+		break;
+
+		case 2:
+			// SJF
+			sjf_algorithm(list);
+		break;
+		
+		case 3:
+			// SRT 
+			srt_algorithm(list);
+		break;
+		
+		case 4:
+			// RR
+			rr_algorithm(list);
+		break;
+ 	}
+
+}
+
+
 /**********************************************************************************************************************************
 ****************************************************** MAIN **********************************************************************
 ***********************************************************************************************************************************/
@@ -135,7 +202,11 @@ int main(){
 			}
 			processCount++;
 		}
-		output_list(&burstList);
+		
+		output_algorithm(&burstList, check);
+
+// output the list to check values exist
+//		output_list(&burstList);
 
 	}else {
 		printf("You didn't enter a valid algorithm. Process terminated!\n");		
