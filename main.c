@@ -21,9 +21,9 @@ struct times {
 
 // outputs list
 
-void output_list(struct times * list){
+void output_list(struct times ** list){
 	
-	struct times * cur = list;
+	struct times * cur = *list;
 	if(list != 0){
 		printf("test");
 		while(cur->next != 0){
@@ -39,33 +39,26 @@ void output_list(struct times * list){
 
 // get the burst times from the user
 
-void add_burst_time(struct times * list, int new_time){
+void add_burst_time(struct times ** list, int new_time){
 	
-	printf("test");
+	struct times * temp, *r;
+	temp = * list;
 	
-	struct times * temp;
-	struct times * cur;
-	temp = (struct times *) malloc( sizeof(struct times) );	
-	temp->value = new_time;
-	temp->next = 0;	
-	
-	if(temp == 0){
-		printf("Out of memory from adding to list");
-		return;
+	if(*q == 0){
+		temp = ((struct times *) malloc(sizeof(struct times)));
+		temp->value = new_time;
+		temp->next = 0;
+		*list = temp;
 	}else {
-
-		if(list == 0){
-			list = temp;
-		}else {
-printf("tst");
-			while(cur->next != 0){
-				cur = cur->next;
-			}
-			cur->next = temp;
-			temp = list;
+		while(temp->next != 0){
+			temp = temp->next;
 		}
-
+		r = ((struct times *)malloc(sizeof(struct times)));
+		r->value = new_time;
+		r->next = 0;
+		temp->next = r;
 	}
+	
 }
 
 
@@ -118,7 +111,8 @@ int main(){
 				printf("What is the time quanta for %s scheduling\n", algor);
 				scanf("%d", &tempNum);
  				if(tempNum > 0){
- 					add_burst_time(burstList, tempNum);
+ 					
+ 					add_burst_time(&burstList, tempNum);
  				}else {
  					printf("Input terminated\n");
  					timeRetrieve = 0;
