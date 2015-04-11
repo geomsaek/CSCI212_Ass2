@@ -19,23 +19,34 @@ struct times {
 
 /******** FUNCTIONS ********/
 
-// outputs list
+// outputs the values based on the Round Robin values (RR)
 
-void output_list(struct times ** list){
+void round_robin(struct times ** list){
 	
-	struct times * cur = *list;
-	if(list != 0){
-		printf("test");
-		while(cur->next != 0){
-			printf("value: %d \n", cur->value);
-			cur = cur->next;
-		}
-		printf("value: %d", cur->value);
-	}else {
-		printf("No Values");
-	}
+	
+
+
 }
 
+
+
+// outputs list - more of a sanity check to ensure list values are present
+void output_list(struct times ** list){
+	
+	struct times * temp;
+	temp = *list;
+	
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+		while(temp->next != 0){
+			printf("%d\n", temp->value);
+			temp = temp->next;
+		}
+		printf("%d\n", temp->value);
+	}
+	
+}
 
 // get the burst times from the user
 
@@ -44,7 +55,7 @@ void add_burst_time(struct times ** list, int new_time){
 	struct times * temp, *r;
 	temp = * list;
 	
-	if(*q == 0){
+	if(temp == 0){
 		temp = ((struct times *) malloc(sizeof(struct times)));
 		temp->value = new_time;
 		temp->next = 0;
@@ -97,6 +108,8 @@ int main(){
 	int timeRetrieve = 1;
 	int tempNum = 0;
 	struct times * burstList = 0;
+	char endof;
+	int c;
 		
 	printf("Welcome to the Job Scheduler Computer.\nWhat algorithm would you like to use\n");
 	scanf("%s", algor);
@@ -105,28 +118,24 @@ int main(){
 
 	if(check){		
 		// check if algorithm is round robin (RR)
-		
 		if(check == 4){
 			while(timeRetrieve == 1){
 				printf("What is the time quanta for %s scheduling\n", algor);
-				scanf("%d", &tempNum);
- 				if(tempNum > 0){
- 					
+				scanf("%d", &tempNum);				
+				if (!feof(stdin)){
  					add_burst_time(&burstList, tempNum);
  				}else {
  					printf("Input terminated\n");
  					timeRetrieve = 0;
  				}
-
 			}
-//			output_list(burstList);
+			output_list(&burstList);
 		}else {
 		
 		}
 	}else {
 		printf("You didn't enter a valid algorithm. Process terminated!\n");		
 	}
-
 	
 	return 0;
 }
