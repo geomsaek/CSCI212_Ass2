@@ -19,6 +19,71 @@ struct times {
 
 /******** FUNCTIONS ********/
 
+// output summary
+
+void output_summary(char value[50], struct times ** list, int startIncre){
+
+	
+	printf("\n");
+	printf("%s\n", value);
+	struct times * temp;
+	temp = *list;
+	
+	if(temp != 0){
+		while(temp->next != 0){
+			printf("P%d\t\t%d\n", startIncre, temp->value);
+			startIncre++;
+			temp = temp->next;
+		}
+		printf("P%d\t\t%d\n", startIncre, temp->value);
+	}
+	
+	printf("\n");
+
+}
+
+
+// outputs list - more of a sanity check to ensure list values are present
+void output_list(struct times ** list){
+	
+	struct times * temp;
+	temp = *list;
+	
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+		while(temp->next != 0){
+			printf("%d\n", temp->value);
+			temp = temp->next;
+		}
+		printf("%d\n", temp->value);
+	}
+	
+}
+
+// get the burst times from the user
+void add_burst_time(struct times ** list, int new_time){
+	
+	struct times * temp, *r;
+	temp = * list;
+	
+	if(temp == 0){
+		temp = ((struct times *) malloc(sizeof(struct times)));
+		temp->value = new_time;
+		temp->next = 0;
+		*list = temp;
+	}else {
+		while(temp->next != 0){
+			temp = temp->next;
+		}
+		r = ((struct times *)malloc(sizeof(struct times)));
+		r->value = new_time;
+		r->next = 0;
+		temp->next = r;
+	}
+	
+}
+
 // get the wait time
 void get_wait_time(struct times ** list){
 
@@ -46,6 +111,66 @@ void get_wait_time(struct times ** list){
 			processCounter++;
 		}
 		printf("P%d\t\t%d\n", processCounter, startTime);
+	}
+}
+
+
+// marks the shortest number with a minus -1;
+void mark_shortest(struct times ** list, int index){
+	
+	struct times * temp;
+	temp = *list;
+	int counter = 0;
+	
+	while(temp->next != 0){
+		if(counter == index){
+			temp->value = -1;
+		}
+		counter = counter + 1;
+		temp = temp->next;
+	}
+	if(counter == index){
+		temp->value = -1;
+	}
+	
+}
+
+// finds the shortest number and marks the number with a -1
+int findshortest(struct times ** list){
+
+	struct times * temp;
+	temp = *list;
+	int shortest = 9999;
+	int shortLocate = 0;
+	int counter = 0;
+	int found = 0;
+	
+	while(temp->next != 0){
+			
+		if(temp->value != -1){
+			if(temp->value < shortest){
+				shortest = temp->value;
+				shortLocate = counter;
+				found = 1;
+			}
+		}
+		counter = counter + 1;
+		temp = temp->next;
+	}
+	if(temp->value != -1){
+		if(temp->value < shortest){
+			shortest = temp->value;
+			shortLocate = counter;
+			found = 1;
+		}
+	}
+		mark_shortest(list, shortLocate);	
+
+	if(found > 0){
+
+		return shortest;
+	}else {
+		return -1;
 	}
 }
 
@@ -78,28 +203,43 @@ void get_turn_around(struct times ** list){
 
 // outputs the values based on the Round Robin values (RR)
 
-void rr_algorithm(struct times ** list){
+void rr_algorithm(struct times ** list, int quanta){
 	
-	printf("\n");
-	printf("Scheduled Jobs\n\n");
-	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
+	if(quanta > 0){
+		printf("\n");
+		printf("Scheduled Jobs\n\n");
+		printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 	
-	struct times * temp;
-	temp = *list;
-	int processCounter = 1;
+		struct times * temp;
+		temp = *list;
+		int processCounter = 1, scheduling = 1;
 	
-	if(temp == 0){
-		printf("Nothing in the list\n");
-	}else {
-		while(temp->next != 0){
-			printf("P%d\t\t\t%d\t\t\t0\t\t\t%d\n", processCounter, temp->value, temp->value);
-			temp = temp->next;
-			processCounter++;
+		if(temp == 0){
+			printf("Nothing in the list\n");
+		}else {
+	
+			while(scheduling == 1){
+				while(temp->next != 0){
+					if(temp->value % quanta > 0){
+					
+					}else {
+						temp->value = -1;
+					}
+			
+			
+					temp = temp->next;
+				}
+			}
+
+	
+	
+	
 		}
-		printf("%d\n", temp->value);
-	}
 		
-	printf("\n");
+		printf("\n");
+	}else {
+		printf("Quanta time must be greater than 0\n");
+	}
 }
 
 // outputs the values based on the FCFS algorithm
@@ -150,75 +290,56 @@ void sjf_algorithm(struct times ** list){
 	printf("Scheduled Jobs\n\n");
 	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 
+	int processCounter = 1, startTime = 0, stopTime = 0, searching = 1, curShort = 0, counter = 0;	
+	struct times * visited = 0;
 	struct times * temp;
-	temp = *list;
-	int processCounter = 1;
-	int startTime = 0;
-	int stopTime = 0;
+	struct times * wait = 0;
+	struct times * turnaround = 0;
+	char waitMessage[50] = { "Computing Wait times\n" };
+	char summaryMessage[50] = { "Computing Turn around times\n" };
 	
-	if(temp == 0){
-		
-		
-	}else {
-		
-	}
-	
-
-	
-	printf("\n");
-}
-
-//outputs the values based on the SRT algorithm
-void srt_algorithm(struct times ** list){
-	printf("\n");
-	printf("Scheduled Jobs\n\n");
-	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
-	
-	
-	
-	printf("\n");
-}
-
-// outputs list - more of a sanity check to ensure list values are present
-void output_list(struct times ** list){
-	
-	struct times * temp;
 	temp = *list;
 	
 	if(temp == 0){
 		printf("Nothing in the list\n");
 	}else {
-		while(temp->next != 0){
-			printf("%d\n", temp->value);
-			temp = temp->next;
+
+		while(searching == 1){
+			
+			curShort = findshortest(list);
+			if(curShort == -1){
+				searching = 0;
+			}else {
+				stopTime = stopTime + curShort;
+				add_burst_time(&wait, startTime);
+				add_burst_time(&turnaround, stopTime);
+				printf("P%d\t\t\t%d\t\t\t\t\%d\t\t\t\t%d\n", counter, curShort, startTime, stopTime);
+				startTime = startTime + curShort;
+				
+			}
+			counter++;
 		}
-		printf("%d\n", temp->value);
 	}
+	counter = 1;
+	output_summary(waitMessage, &wait, counter);
+	counter = 1;
+	output_summary(summaryMessage, &turnaround, counter);
 	
+	printf("\n");
 }
 
-// get the burst times from the user
+//outputs the values based on the SRT algorithm
+// this is the same as the sjf as the arrival time is the same i.e 0
+void srt_algorithm(struct times ** list){
 
-void add_burst_time(struct times ** list, int new_time){
+	printf("\n");
+	printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
+	printf("Scheduled Jobs\n\n");
+	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 	
-	struct times * temp, *r;
-	temp = * list;
+	sjf_algorithm(list);
 	
-	if(temp == 0){
-		temp = ((struct times *) malloc(sizeof(struct times)));
-		temp->value = new_time;
-		temp->next = 0;
-		*list = temp;
-	}else {
-		while(temp->next != 0){
-			temp = temp->next;
-		}
-		r = ((struct times *)malloc(sizeof(struct times)));
-		r->value = new_time;
-		r->next = 0;
-		temp->next = r;
-	}
-	
+	printf("\n");
 }
 
 
@@ -251,7 +372,7 @@ int get_algorithm(const char * userSelect){
 // 4 - RR
 
 // select the correct algorithm
-void output_algorithm(struct times ** list, int choice){
+void output_algorithm(struct times ** list, int choice, int quanta){
 	
 	switch(choice){
 	
@@ -272,7 +393,7 @@ void output_algorithm(struct times ** list, int choice){
 		
 		case 4:
 			// RR
-			rr_algorithm(list);
+			rr_algorithm(list, quanta);
 		break;
  	}
 
@@ -319,7 +440,7 @@ int main(){
 			processCount++;
 		}
 		
-		output_algorithm(&burstList, check);
+		output_algorithm(&burstList, check, quanta);
 
 // output the list to check values exist
 //		output_list(&burstList);
