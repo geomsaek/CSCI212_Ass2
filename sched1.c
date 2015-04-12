@@ -17,10 +17,17 @@ struct times {
 	struct times * next;
 };
 
-/******** FUNCTIONS ********/
+struct summary {
+	int pid;
+	int time;
+	struct summary * next;
+};
 
-// output summary
+/***********************************************************************************************************************************
+******************************************************** FUNCTIONS *****************************************************************
+***********************************************************************************************************************************/
 
+// output summary for struct: times list
 void output_summary(char value[50], struct times ** list, int startIncre){
 
 	
@@ -36,6 +43,26 @@ void output_summary(char value[50], struct times ** list, int startIncre){
 			temp = temp->next;
 		}
 		printf("P%d\t\t%d\n", startIncre, temp->value);
+	}
+	
+	printf("\n");
+
+}
+
+// output summary for struct: summary list
+void output_rr_summary(char value[50], struct summary ** list){
+
+	printf("\n");
+	printf("%s\n", value);
+	struct summary * temp;
+	temp = *list;
+	
+	if(temp != 0){
+		while(temp->next != 0){
+			printf("P%d\t\t%d\n", temp->pid, temp->time);
+			temp = temp->next;
+		}
+		printf("P%d\t\t%d\n", temp->pid, temp->time);
 	}
 	
 	printf("\n");
@@ -61,7 +88,7 @@ void output_list(struct times ** list){
 	
 }
 
-// get the burst times from the user
+// add values to list pointer - struct: times
 void add_burst_time(struct times ** list, int new_time){
 	
 	struct times * temp, *r;
@@ -78,6 +105,31 @@ void add_burst_time(struct times ** list, int new_time){
 		}
 		r = ((struct times *)malloc(sizeof(struct times)));
 		r->value = new_time;
+		r->next = 0;
+		temp->next = r;
+	}
+	
+}
+
+// add values to struct: summary
+void add_summary_list(struct summary ** list, int new_pid, int new_time){
+	
+	struct summary * temp, *r;
+	temp = * list;
+	
+	if(temp == 0){
+		temp = ((struct summary *) malloc(sizeof(struct summary)));
+		temp->pid = new_pid;
+		temp->time = new_time;
+		temp->next = 0;
+		*list = temp;
+	}else {
+		while(temp->next != 0){
+			temp = temp->next;
+		}
+		r = ((struct summary *)malloc(sizeof(struct summary)));
+		r->pid = new_pid;
+		r->time = new_time;
 		r->next = 0;
 		temp->next = r;
 	}
@@ -201,17 +253,28 @@ void get_turn_around(struct times ** list){
 	
 }
 
+/**********************************************************************************************************************************
+***********************************************************************************************************************************
+***********************************************************************************************************************************/
+
+
+/***********************************************************************************************************************************
+******************************************************** ALGORITHMS ****************************************************************
+***********************************************************************************************************************************/
+
 // outputs the values based on the Round Robin values (RR)
 
 void rr_algorithm(struct times ** list, int quanta){
 	
 	if(quanta > 0){
-		printf("\n");
-		printf("Scheduled Jobs\n\n");
-		printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
-	
 		struct times * temp;
+		
 		temp = *list;
+		
+		struct summary * wait = 0;
+		struct summary * turnaround = 0;
+		char waitMessage[50] = { "Computing Wait times\n" };
+		char summaryMessage[50] = { "Computing Turn around times\n" };
 		int processCounter = 1, scheduling = 1, time = 0, finished = 0, burst = 0, start = 0;
 	
 		if(temp == 0){
@@ -225,7 +288,9 @@ void rr_algorithm(struct times ** list, int quanta){
 						if(temp->value - quanta > 0){
 							time = time + 2;
 							burst = temp->value;
+							add_summary_list(&turnaround, processCounter, time);
 							printf("P%d\t\t\t\%d\t\t\t\t%d\t\t\t\t%d\n", processCounter, burst, start, time);
+							add_summary_list(&wait, processCounter, start);
 							start = start + 2;
 							temp->value = temp->value - quanta;
 							if(finished == 0){
@@ -234,9 +299,10 @@ void rr_algorithm(struct times ** list, int quanta){
 						}else {
 							time = time + temp->value;
 							burst = temp->value;
-
+							add_summary_list(&turnaround, processCounter, time);
 							printf("P%d\t\t\t\%d\t\t\t\t%d\t\t\t\t%d\n", processCounter, burst, start, time);
 							start = start + temp->value;
+							add_summary_list(&wait, processCounter, start);
 
 							temp->value = -1;
 						}
@@ -248,7 +314,9 @@ void rr_algorithm(struct times ** list, int quanta){
 					if(temp->value - quanta > 0){
 						time = time + 2;
 						burst = temp->value;
-						printf("P%d\t\t\t\%d\t\t\t\t%d\t\t\t\t%d\n", processCounter, burst, start, time);						
+						add_summary_list(&turnaround, processCounter, time);
+						printf("P%d\t\t\t\%d\t\t\t\t%d\t\t\t\t%d\n", processCounter, burst, start, time);
+						add_summary_list(&wait, processCounter, start);
 						start = start + 2;
 
 						temp->value = temp->value - quanta;
@@ -258,10 +326,10 @@ void rr_algorithm(struct times ** list, int quanta){
 					}else {
 						time = time + temp->value;
 						burst = temp->value;
-
-						printf("P%d\t\t\t\%d\t\t\t\t%d\t\t\t\t%d\n", processCounter, burst, start, time);			
+						add_summary_list(&turnaround, processCounter, time);
+						printf("P%d\t\t\t\%d\t\t\t\t%d\t\t\t\t%d\n", processCounter, burst, start, time);
 						start = start + temp->value;
-
+						add_summary_list(&wait, processCounter, start);
 						temp->value = -1;
 					}
 				}
@@ -275,7 +343,9 @@ void rr_algorithm(struct times ** list, int quanta){
 
 			}
 		}
-		printf("P%d\t\t\t\%d\t\t\t\t%d\t\t\t\t%d\n", processCounter, burst, start, time);				
+		output_rr_summary(waitMessage, &wait);
+		output_rr_summary(summaryMessage, &turnaround);
+		
 		printf("\n");
 	}else {
 		printf("Quanta time must be greater than 0\n");
@@ -285,11 +355,6 @@ void rr_algorithm(struct times ** list, int quanta){
 // outputs the values based on the FCFS algorithm
 
 void fcfs_algorithm(struct times ** list){
-
-	printf("\n");
-	printf("************* FIRST COME FIRST SERVED (FCFS) *************\n\n");
-	printf("Scheduled Jobs\n\n");
-	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 
 	struct times * temp;
 	temp = *list;
@@ -324,11 +389,6 @@ void fcfs_algorithm(struct times ** list){
 // outputs the values based on the SJF algorithm
 
 void sjf_algorithm(struct times ** list){
-
-	printf("\n");
-	printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
-	printf("Scheduled Jobs\n\n");
-	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 
 	int processCounter = 1, startTime = 0, stopTime = 0, searching = 1, curShort = 0, counter = 0;	
 	struct times * visited = 0;
@@ -371,16 +431,16 @@ void sjf_algorithm(struct times ** list){
 //outputs the values based on the SRT algorithm
 // this is the same as the sjf as the arrival time is the same i.e 0
 void srt_algorithm(struct times ** list){
-
-	printf("\n");
-	printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
-	printf("Scheduled Jobs\n\n");
-	printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 	
 	sjf_algorithm(list);
 	
 	printf("\n");
 }
+
+
+/***********************************************************************************************************************************
+******************************************************** ALGORITHMS ****************************************************************
+***********************************************************************************************************************************/
 
 
 // convert the selected choice into a numeric identifier
@@ -418,21 +478,38 @@ void output_algorithm(struct times ** list, int choice, int quanta){
 	
 		case 1:
 			// FCFS
+			printf("\n");
+			printf("************* FIRST COME FIRST SERVED (FCFS) *************\n\n");
+			printf("Scheduled Jobs\n\n");
+			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 			fcfs_algorithm(list);
 		break;
 
 		case 2:
 			// SJF
+			printf("\n");
+			printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
+			printf("Scheduled Jobs\n\n");
+			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 			sjf_algorithm(list);
 		break;
 		
 		case 3:
 			// SRT 
+			printf("\n");
+			printf("************* SHORTEST RETURN TIME FIRST (SRT) *************\n\n");
+			printf("Scheduled Jobs\n\n");
+			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 			srt_algorithm(list);
 		break;
 		
 		case 4:
 			// RR
+			printf("\n");
+			printf("************* ROUND ROBIN (R) *************\n\n");
+			printf("Quanta Time: %d\n", quanta);
+			printf("Scheduled Jobs\n\n");
+			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
 			rr_algorithm(list, quanta);
 		break;
  	}
@@ -448,11 +525,7 @@ int main(){
 
 	char algor[10];
 	// value for quanta - RR only
-	int quanta = 0;
-	int check = 0;
-	int timeRetrieve = 1;
-	int tempNum = 0;
-	int processCount = 1;
+	int quanta = 0, check = 0, timeRetrieve = 1, processCount = 1, tempNum = 0;
 	struct times * burstList = 0;
 
 	printf("Welcome to the Job Scheduler Computer.\nWhat algorithm would you like to use\n");
