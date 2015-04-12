@@ -15,6 +15,7 @@
 struct times {
 	int burst;
 	int arrival;
+	int searched;
 	struct times * next;
 };
 
@@ -56,7 +57,7 @@ void add_processes(struct times ** list, int new_burst, int new_arrival){
 		temp = ((struct times *) malloc(sizeof(struct times)));
 		temp->burst = new_burst;
 		temp->arrival = new_arrival;
-
+		temp->searched = 0;
 		temp->next = 0;
 		*list = temp;
 	}else {
@@ -66,12 +67,26 @@ void add_processes(struct times ** list, int new_burst, int new_arrival){
 		r = ((struct times *)malloc(sizeof(struct times)));
 		r->burst = new_burst;
 		r->arrival = new_arrival;
+		r->searched = 0;
 		r->next = 0;
 		temp->next = r;
 	}
 	
 }
 
+// marks the shortest number with a minus -1;
+void reset_searched_markers(struct times ** list){
+	
+	struct times * temp;
+	temp = *list;
+	
+	while(temp->next != 0){
+		temp->searched = 0;
+		temp = temp->next;
+	}
+	temp->searched = 0;	
+	
+}
 
 // marks the shortest number with a minus -1;
 void mark_shortest(struct times ** list, int index){
@@ -82,15 +97,13 @@ void mark_shortest(struct times ** list, int index){
 	
 	while(temp->next != 0){
 		if(counter == index){
-			temp->arrival = -1;
-			temp->burst = -1;
+			temp->searched = -1;
 		}
 		counter = counter + 1;
 		temp = temp->next;
 	}
 	if(counter == index){
-		temp->arrival = -1;
-		temp->burst = -1;
+		temp->searched = -1;
 	}
 	
 }
@@ -116,7 +129,7 @@ void findshortest(struct times ** list, int ** low_burst, int ** low_arrival){
 
 		while(temp->next != 0){
 			
-			if(temp->arrival != -1){
+			if(temp->searched != -1){
 				if(temp->arrival < shortArrive){
 					shortArrive = temp->arrival;
 					shortBurst = temp->burst;
@@ -130,7 +143,7 @@ void findshortest(struct times ** list, int ** low_burst, int ** low_arrival){
 			counter = counter + 1;
 			temp = temp->next;
 		}
-		if(temp->arrival != -1){
+		if(temp->searched != -1){
 			if(temp->arrival < shortArrive){
 				shortArrive = temp->arrival;
 				shortBurst = temp->burst;
@@ -154,35 +167,86 @@ void findshortest(struct times ** list, int ** low_burst, int ** low_arrival){
 ******************************************************** SUMMARIES ****************************************************************
 ***********************************************************************************************************************************/
 
+// computing wait times for fcfs algorithm
 void fcfs_wait_time(struct times ** list){
+	
 	printf("\n");
-	printf("Computing Wait times\n\n");
+	printf("Computing Wait times\n");
 	printf("\n");
 	
 	struct times * temp;
 	temp = *list;
-	int processCounter = 1;
-	int startTime = 0, processing = 1, processCounter = 0;
+	int startTime = 0, processing = 1, processCounter = 1, first = 0, stopTime = 0;
 
 	int * lowArrive;
 	int * lowBurst;
 	
-	if(temp != 0){
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+
 		while(processing == 1){
+
 			findshortest(&temp, &lowBurst, &lowArrive);
 			
 			if(*lowArrive != -1){
+				if(first == 1){
+					startTime = *lowArrive;
+					stopTime = startTime + *lowBurst;
+					first = 0;
+				}else {
+					startTime = stopTime - *lowArrive;
+					stopTime = startTime + *lowBurst;
+				}
+				printf("P%d\t%d\n",processCounter, startTime);
 				
 			}else {
 				processing = 0;
 			}
 			processCounter++;
 		}
-		
-	}else {
-		return;
 	}
 	
+}
+
+// computing turn around times for fcfs algorithm
+void fcfs_turn_around(struct times ** list){
+
+	printf("\n");
+	printf("Computing Turn around times\n");
+	printf("\n");
+	
+	struct times * temp;
+	temp = *list;
+	int turnaround = 0, processing = 1, processCounter = 1, first = 0;
+
+	int * lowArrive;
+	int * lowBurst;
+	
+	if(temp == 0){
+		printf("Nothing in the list\n");
+	}else {
+
+		while(processing == 1){
+
+			findshortest(&temp, &lowBurst, &lowArrive);
+			
+			if(*lowArrive != -1){
+				if(first == 1){
+					turnaround = *lowBurst - *lowArrive;
+				}else {
+					turnaround = turnaround + (*lowBurst - *lowArrive);
+
+				}
+
+				printf("P%d\t%d\n",processCounter, turnaround);
+				
+			}else {
+				processing = 0;
+			}
+			processCounter++;
+		}
+	}
 }
 
 
@@ -196,16 +260,10 @@ void fcfs_algorithm(struct times ** list){
 
 	struct times * temp;
 	temp = *list;
-	int processCounter = 1;
-	int startTime = 0;
-	int stopTime = 0;
-	int first = 1;
-	
-	int processing = 1;
+	int processCounter = 1, startTime = 0, stopTime = 0, first = 1, processing = 1;
 	
 	int * lowArrive;
 	int * lowBurst;
-	
 	
 	if(temp == 0){
 		printf("Nothing in the list\n");
@@ -230,14 +288,13 @@ void fcfs_algorithm(struct times ** list){
 			}else {
 				processing = 0;
 			}
-			processCounter++;
-
-			
+			processCounter++;	
 		}
+		reset_searched_markers(list);
+		fcfs_wait_time(list);
+		reset_searched_markers(list);
+		fcfs_turn_around(list);
 	}
-	fcfs_wait_time(list);
-	fcfs_turn_around(list);
-	printf("\n");
 }
 
 /***********************************************************************************************************************************
