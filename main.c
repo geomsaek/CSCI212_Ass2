@@ -213,6 +213,7 @@ void rr_algorithm(struct times ** list, int quanta){
 		struct times * temp;
 		temp = *list;
 		int processCounter = 1, scheduling = 1;
+		int finished = 0;
 	
 		if(temp == 0){
 			printf("Nothing in the list\n");
@@ -221,19 +222,24 @@ void rr_algorithm(struct times ** list, int quanta){
 			while(scheduling == 1){
 				while(temp->next != 0){
 					if(temp->value % quanta > 0){
-					
+						temp->value = temp->value % quanta;
+						if(finished == 0){
+							finished = 1;
+						}
 					}else {
 						temp->value = -1;
 					}
-			
-			
 					temp = temp->next;
 				}
+				output_list(&list);
+				prinf("\n");
+				if(finished == 0){
+					scheduling = 0;
+				}else {
+					finished = 0;
+					temp = *list;
+				}
 			}
-
-	
-	
-	
 		}
 		
 		printf("\n");
