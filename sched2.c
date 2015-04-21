@@ -26,7 +26,7 @@ struct summary {
 };
 
 /***********************************************************************************************************************************
-******************************************************** FUNCTIONS *****************************************************************
+******************************************************** HELPER FUNCTIONS *****************************************************************
 ***********************************************************************************************************************************/
 
 // outputs list - more of a sanity check to ensure list values are present
@@ -159,6 +159,85 @@ void findshortest(struct times ** list, int ** low_burst, int ** low_arrival){
 		mark_shortest(list, shortLocate);
 	}else {
 		return;
+	}
+
+}
+
+int check_shorter_time(struct times ** list, int curArrive){
+
+	struct times * cur;
+	cur = *list;
+	int shorter = 0;
+	
+	while(cur->next != 0){
+		if(cur->arrival < curArrive){
+			if(cur->searched != -1){
+				shorter = 1;
+				cur->searched = -1;
+			}
+		}
+		cur = cur->next;
+	}
+	if(shorter == 0){
+		if(cur->arrival < curArrive){
+			if(cur->searched != -1){
+				shorter = 1;
+				cur->searched = -1;
+			}
+		}		
+	}
+	
+	return shorter;
+}
+
+// returns an integer relating to the length of a list
+int get_list_length(struct times ** list){
+	
+	struct times * cur;
+	cur = *list;
+	int count = 0;
+	
+	
+	if(list == 0){
+		return 0;
+	}else {
+		while(cur->next != 0){
+			cur = cur->next;
+			count = count + 1;
+		}
+		count = count + 1;
+		return count;
+	}
+	
+}
+
+// sorts a list into descending order
+void listsort(struct times ** list){
+	
+	struct times * tmpPtr = *list;
+	struct times * tmpNxt = tmpPtr->next;
+	int tmpArrive = 0;
+	int tmpBurst = 0;
+	
+	if(list != 0){
+	
+		while(tmpNxt != NULL){
+		   while(tmpNxt != tmpPtr){
+					if(tmpNxt->arrival < tmpPtr->arrival){
+						tmpArrive = tmpPtr->arrival;
+						tmpBurst = tmpPtr->burst;
+						
+						tmpPtr->arrival = tmpNxt->arrival;
+						tmpPtr->burst = tmpNxt->burst;
+						tmpPtr->searched = 0;
+						tmpNxt->arrival = tmpArrive;
+						tmpNxt->burst = tmpBurst;
+					}
+					tmpPtr = tmpPtr->next;
+			}
+			tmpPtr = *list;
+			tmpNxt = tmpNxt->next;
+		}
 	}
 
 }
@@ -297,6 +376,142 @@ void fcfs_algorithm(struct times ** list){
 	}
 }
 
+
+int find_index(struct times ** list, int curIndex){
+
+	struct times * cur = *list;	
+	int nextIndex = curIndex + 1;
+	int nextArrive = 0;
+	int counter = 0;
+	
+	while(cur->next != 0){
+	
+		if(counter == nextIndex){
+			nextArrive = cur->arrival;
+		}
+		cur = cur->next;
+		counter = counter + 1;
+	}
+	return nextArrive;
+
+}
+
+//outputs the values based on the SJF algorithm
+
+int get_next(struct times ** list, int curIndex, int arrive_burst){
+
+	struct times * cur = *list;
+	int counter = 0;
+	int nextVal = 0;
+	int found = 0;
+	
+	while(cur->next != 0){
+		
+		if(counter == curIndex + 1){
+			if(arrive_burst == 1){
+				nextVal= cur->burst;
+			}else {
+				nextVal= cur->arrival;
+			}
+			found = 1;
+		}
+		cur = cur->next;
+		counter = counter + 1;
+	}
+	if(counter == curIndex + 1){
+		if(arrive_burst == 1){
+			nextVal= cur->burst;
+		}else {
+			nextVal = cur->arrival;
+		}
+		found = 1;
+	}
+	
+	if(found == 1){
+		return nextVal;
+	}else {
+		return -1;
+	}
+	
+}
+
+void switch_location(struct times ** list, struct times ** cur, int counter){
+	
+	struct times * temp = *list;
+	int incre = 0;
+	
+	while(temp->next != 0){
+		
+		
+		temp = temp->next;
+	}
+	
+}
+
+int find_next_lowest(struct times ** list, struct times * locate){
+
+	int lowest = 999;
+	struct times * cur = *list;
+	int find = 0;
+	
+	while(cur->next != 0){
+		if(cur->burst != -1){
+			if(lowest > cur->burst){
+				locate = cur;
+				find = 1;
+			}
+		}
+		cur = cur->next;
+	}
+	if(cur->burst != -1){
+		if(lowest > cur->burst){
+			locate = cur;
+			find = 1;
+		}	
+	}
+	if(find == 0){
+		return -1;
+	}else {
+		return 1;
+	}
+	
+}
+
+void sjf_algorithm(struct times ** list){
+	
+	struct times * cur = *list;
+	struct times * ahead = *list;
+	ahead = ahead->next;
+	int counter = 0;
+	
+	printf("\n");	
+	
+	if(list != 0){
+
+		listsort(list);		
+		output_list(list);	
+
+		burstCounter = cur->burst;
+		curArrive = cur->arrival;
+		nextArrive = get_next(list, counter, 0);
+		nextBurst = get_next(list, counter, 1);
+		arrivalPointer = 0;
+		
+//		while(processing == 1){
+		while(counter < 10){
+			
+
+			
+			counter = counter + 1;
+			
+		}
+		printf("\n");
+	}else {
+		printf("Nothing in the list\n");
+	}
+	
+}
+
 /***********************************************************************************************************************************
 ******************************************************** FUNCTIONS *****************************************************************
 ***********************************************************************************************************************************/
@@ -349,7 +564,7 @@ void output_algorithm(struct times ** list, int choice, int quanta){
 			printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
 			printf("Scheduled Jobs\n\n");
 			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
-//			sjf_algorithm(list);
+			sjf_algorithm(list);
 		break;
 		
 		case 3:
@@ -384,7 +599,16 @@ int main(){
 	// value for quanta - RR only
 	int quanta = 0, check = 0, timeRetrieve = 1, processCount = 1, tempNum = 0, tempProcess = 0;
 	struct times * burstList = 0;
+	
+	add_processes(&burstList, 8, 0);
+	add_processes(&burstList, 6, 1);
+	add_processes(&burstList, 6, 2);
+	add_processes(&burstList, 2, 3);
+	add_processes(&burstList, 3, 4);
+	add_processes(&burstList, 1, 5);
+	output_algorithm(&burstList, 2,0);
 
+/*
 	printf("Welcome to the Job Scheduler Computer.\nWhat algorithm would you like to use\n");
 	scanf("%s", algor);
 	
@@ -401,6 +625,7 @@ int main(){
 			printf("Process %d (P%d) – What is the burst time & start time?\n",processCount, processCount);
 			scanf("%d%d", &tempNum, &tempProcess);
 			if (!feof(stdin)){
+				
 				add_processes(&burstList, tempNum, tempProcess);
 			}else {
 				printf("Input terminated\n");
@@ -413,7 +638,7 @@ int main(){
 
 	}else {
 		printf("You didn't enter a valid algorithm. Process terminated!\n");		
-	}
+	}*/
 	
 	return 0;
 }
