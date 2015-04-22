@@ -15,6 +15,7 @@
 struct times {
 	int burst;
 	int arrival;
+	int index;
 	int searched;
 	struct times * next;
 };
@@ -26,7 +27,201 @@ struct summary {
 };
 
 /***********************************************************************************************************************************
-******************************************************** HELPER FUNCTIONS *****************************************************************
+******************************************************** HELPER FUNCTIONS - SRT ALGORITHM ******************************************
+***********************************************************************************************************************************/
+
+// marks the shortest number with a minus -1;
+void srt_mark_shortest(struct times ** list, int index){
+	
+	struct times * temp;
+	temp = *list;
+	int counter = 0;
+	
+	while(temp->next != 0){
+		if(counter == index){
+			temp->searched = -1;
+		}
+		counter = counter + 1;
+		temp = temp->next;
+	}
+	if(counter == index){
+		temp->searched = -1;
+	}
+	
+}
+
+int srt_findshortest(struct times ** list){
+
+	struct times * temp;
+	temp = *list;
+	int shortest = 9999;
+	int counter = 0;
+	int shortLocate = 0;
+	int found = 0;
+	
+	while(temp->next != 0){
+			
+		if(temp->searched != -1){
+			if(temp->burst < shortest){
+				shortest = temp->burst;
+				shortLocate = counter;
+				found = 1;
+			}
+		}
+		counter = counter + 1;
+		temp = temp->next;
+	}
+	if(temp->searched != -1){
+		if(temp->burst < shortest){
+			shortLocate = counter;
+			shortest = temp->burst;
+			found = 1;
+		}
+	}
+	srt_mark_shortest(list, shortLocate);
+	if(found > 0){
+		return shortest;
+	}else {
+		return -1;
+	}
+}
+
+// repeated function to track index, had issues with this so had to use something that worked at the time
+int srt_find_index(struct times ** list){
+
+	struct times * temp;
+	temp = *list;
+	int shortest = 9999, counter = 0, shortLocate = 0,  found = 0;
+	
+	while(temp->next != 0){
+		if(temp->searched != -1){
+			if(temp->burst < shortest){
+				shortest = temp->burst;
+				shortLocate = counter;
+
+				found = 1;
+			}
+		}
+		counter = counter + 1;
+		temp = temp->next;
+	}
+	if(temp->searched != -1){
+		if(temp->burst < shortest){
+			shortLocate = counter;
+			shortest = temp->burst;
+			found = 1;
+		}
+	}
+
+	if(found > 0){
+		return shortLocate;
+	}else {
+		return -1;
+	}
+}
+
+
+void add_burst_time(struct times ** list, int new_time){
+	
+	struct times * temp, *r;
+	temp = * list;
+	
+	if(temp == 0){
+		temp = ((struct times *) malloc(sizeof(struct times)));
+		temp->burst = new_time;
+		temp->next = 0;
+		*list = temp;
+	}else {
+		while(temp->next != 0){
+			temp = temp->next;
+		}
+		r = ((struct times *)malloc(sizeof(struct times)));
+		r->burst = new_time;
+		r->next = 0;
+		temp->next = r;
+	}
+	
+}
+
+int get_last_val(struct times ** list){
+
+	struct times * cur;
+	cur = * list;
+	int last = 0;
+	
+	while(cur->next != 0){
+		cur = cur->next;
+	}
+	last = cur->burst;
+	last = last + 1;
+	return last;
+	
+}
+
+void output_srt_summary(struct times ** curWait, struct times ** plist, char message[50]){
+
+	struct times * curProcess = *plist;
+	struct times * waits = *curWait;
+	
+	printf("\n");
+	printf("%s", message);
+	printf("\n");
+	while(waits->next != 0){
+		printf("P%d\t\t\t%d\n", curProcess->burst, waits->burst);
+		curProcess = curProcess->next;
+		waits = waits->next;
+	}
+	printf("P%d\t\t\t%d\n", curProcess->burst, waits->burst);
+	printf("\n");
+}
+
+
+void srt_remainder(struct times ** list, struct times ** wait, struct times ** turnaround, struct times ** plist){
+
+	int processCounter = 1, startTime = 0, stopTime = 0, searching = 1, curShort = 0, counter = 0;	
+	struct times * visited = 0;
+	struct times * temp;
+	struct times * curWait = *wait;
+	struct times * curTurn = *turnaround;
+	int locate = 0;
+	
+	struct times * pNewList = *plist;
+	
+	startTime = get_last_val(&curWait);
+	stopTime = get_last_val(&curWait);
+	
+	temp = *list;
+	if(temp == 0){
+		return;
+	}else {
+		while(searching == 1){
+			
+			locate = srt_find_index(list);
+			curShort = srt_findshortest(list);
+			if(curShort == -1){
+				searching = 0;
+			}else {
+				stopTime = startTime + curShort;
+				add_burst_time(&pNewList, locate);
+				add_burst_time(&curWait, startTime);
+				printf("P%d\t\t\t%d\t\t\t\t\%d\t\t\t\t%d\n", locate, curShort, startTime, stopTime);
+				locate = 0;
+				add_burst_time(&curTurn, stopTime);
+				startTime = startTime + curShort;
+			}
+			
+			counter++;
+		}
+	}
+	
+	char message[50] = { "Computing Wait Times\0" };
+	output_srt_summary(&curWait, &pNewList, message);
+	char turnMessage[50] = { "Computing Turn around Times\0" };
+	output_srt_summary(&curTurn, &pNewList, turnMessage);
+}
+
+/***********************************************************************************************************************************
+******************************************************** HELPER FUNCTIONS **********************************************************
 ***********************************************************************************************************************************/
 
 // outputs list - more of a sanity check to ensure list values are present
@@ -211,6 +406,20 @@ int get_list_length(struct times ** list){
 	
 }
 
+void index_list(struct times ** list){
+
+	int counter = 1;
+	struct times * cur = *list;
+	
+	while(cur->next != 0){
+		cur->index = counter;
+		cur = cur->next;
+		counter = counter + 1;
+	}
+	cur->index = counter;
+
+}
+
 // sorts a list into descending order
 void listsort(struct times ** list){
 	
@@ -239,6 +448,7 @@ void listsort(struct times ** list){
 			tmpNxt = tmpNxt->next;
 		}
 	}
+	index_list(list);
 
 }
 
@@ -376,198 +586,62 @@ void fcfs_algorithm(struct times ** list){
 	}
 }
 
-// marks the shortest number with a minus -1;
-void sjf_mark_shortest(struct times ** list, int index){
-	
-	struct times * temp;
-	temp = *list;
-	int counter = 0;
-	
-	while(temp->next != 0){
-		if(counter == index){
-			temp->searched = -1;
-		}
-		counter = counter + 1;
-		temp = temp->next;
-	}
-	if(counter == index){
-		temp->searched = -1;
-	}
-	
-}
 
-
-int sjf_findshortest(struct times ** list){
-
-	struct times * temp;
-	temp = *list;
-	int shortest = 9999;
-	int shortLocate = 0;
-	int counter = 0;
-	int found = 0;
-	
-	while(temp->next != 0){
-			
-		if(temp->searched != -1){
-			if(temp->burst < shortest){
-				shortest = temp->burst;
-				shortLocate = counter;
-				found = 1;
-			}
-		}
-		counter = counter + 1;
-		temp = temp->next;
-	}
-	if(temp->searched != -1){
-		if(temp->burst < shortest){
-			shortest = temp->burst;
-			shortLocate = counter;
-			found = 1;
-		}
-	}
-	sjf_mark_shortest(list, shortLocate);	
-
-	if(found > 0){
-
-		return shortest;
-	}else {
-		return -1;
-	}
-}
-
-
-void add_burst_time(struct times ** list, int new_time){
-	
-	struct times * temp, *r;
-	temp = * list;
-	
-	if(temp == 0){
-		temp = ((struct times *) malloc(sizeof(struct times)));
-		temp->burst = new_time;
-		temp->next = 0;
-		*list = temp;
-	}else {
-		while(temp->next != 0){
-			temp = temp->next;
-		}
-		r = ((struct times *)malloc(sizeof(struct times)));
-		r->burst = new_time;
-		r->next = 0;
-		temp->next = r;
-	}
-	
-}
-
-void sjf_remainder(struct times ** list){
-
-	int processCounter = 1, startTime = 0, stopTime = 0, searching = 1, curShort = 0, counter = 0;	
-	struct times * visited = 0;
-	struct times * temp;
-	struct times * wait = 0;
-	struct times * turnaround = 0;
-	printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
-			printf("Scheduled Jobs\n\n");
-			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
-	temp = *list;
-	if(temp == 0){
-		return;
-	}else {
-		while(searching == 1){
-			
-			curShort = sjf_findshortest(list);
-			if(curShort == -1){
-				searching = 0;
-			}else {
-				stopTime = startTime + curShort;
-				add_burst_time(&wait, startTime);
-				add_burst_time(&turnaround, stopTime);
-				printf("P%d\t\t\t%d\t\t\t\t\%d\t\t\t\t%d\n", counter, curShort, startTime, stopTime);
-				startTime = startTime + curShort;
-			}
-			
-			counter++;
-		}
-	}
-	
-}
-
-void sjf_algorithm(struct times ** list){
+// preemptive version of the SJF algorithm
+void srt_algorithm(struct times ** list){
 	
 	struct times * cur = *list;
 	struct times * ahead = *list;
-	
+	struct times * plist = 0;
 	struct times * wait = 0;
 	struct times * turnaround = 0;
 	
-	int processing = 1, allArrive = 0, counter = 0, executeCycle = 0, setBurst = 1;
-	
-	
-	
-	int curBurst = 0, curArrive = 0;
-	int lastCycle = 0;
-	
+	int processing = 1, allArrive = 0, counter = 0, executeCycle = 0, setBurst = 1, curArrive = 0, lastCycle = 0, startTime = 0, stopTime = 0, processCounter = 1;
+
 	if(list != 0){
 		// set the next pointer
 		ahead = ahead->next;
 		listsort(list);
-		//output_list(list);
 		
 		while(processing == 1){
 			if(allArrive == 1){
 				cur = *list;
-				output_list(list);
-				sjf_remainder(list);
-				printf("All arrive\n");
+				srt_remainder(list, &wait, &turnaround, &plist);
 				processing = 0;
-			}else {
-				
+			}else {				
 				if(lastCycle == 1){
-
 					while(cur->burst > 0){
-						printf("LAST BURST: %d, LAST ARRIVE: %d\n:", cur->burst, cur->arrival);						
 						cur->burst = cur->burst -1;
+						stopTime = stopTime+1;
 					}
+					startTime = startTime + cur->burst;
 					cur->searched = -1;
 					allArrive = 1;
 				}else {
 					curArrive = ahead->arrival;
+					add_burst_time(&wait, stopTime);
+					printf("P%d\t\t\t%d\t\t\t\t%d", cur->index, cur->burst, stopTime);
+					add_burst_time(&plist, cur->index);
 					while(executeCycle < 1){
-						printf("Statement 1: ");
-						printf("BURST DECRE: BEFORE: %d:", cur->burst);
 						cur->burst = cur->burst -1;
-						printf("BURST DECRE: AFTER: %d:\n\n", cur->burst);
+						stopTime = stopTime+1;
 						executeCycle++;
 					}
 					counter = counter + 1;
-					printf("COUNTER: %d" , counter);
 					if(counter == curArrive){
-						printf("Statement 2: ");
-						printf("///OK NEW ARRIVAL HAS COME IN//");
-						printf("ARRIAL: %d, BURST: %d", ahead->arrival, ahead->burst);
-					
+				
 						if(ahead->burst < cur->burst){
-							printf("Statement 3: ");
-							printf("--SWITCH--");
 							cur = ahead;
 							executeCycle = 0;
 						}else {
-							printf("Statement 4: ");
-							printf("--CONTINUE--");
+
 							if(cur->burst >0){
-								printf("Statement 5: ");
-								printf("((((cycle is ongoing)))");
 								executeCycle = 0;
 							}else {
-								printf("Statement 6: ");
 								if(cur->next != 0){
-									printf("Statement 7: ");
-									// this might need to be checked
-									printf("((((cycle has ended moving to next)))");
 									cur->searched = -1;
 									cur = ahead;
 								}else {
-									printf("Statement 7: ");
-									printf("((((cycle has ended and list has ended)))");
 									cur->searched = -1;
 									lastCycle = 1;
 								}
@@ -575,47 +649,33 @@ void sjf_algorithm(struct times ** list){
 						}
 					
 					}else {
-						printf("Statement 8: ");
-						printf("--counter not equal to ahead arrive--");
-					
 						if(cur->burst > 0){
-							printf("Statement 9: ");
 							executeCycle = 0;
 						}else {
-							printf("Statement 10: ");
 							if(cur->next != 0){
-								printf("Statement 11: ");
-								// this might need to be checked
-								printf("((((cycle has ended moving to next)))");
 								cur->searched = -1;
 								cur = ahead;
 							}else {
-								printf("Statement 12: ");
-								printf("((((cycle has ended and list has ended)))");
+							
 								cur->searched = -1;
 								lastCycle = 1;
 							}
 						}
 					}
+					printf("\t\t\t\t%d\n", stopTime);
+					add_burst_time(&turnaround, stopTime);
 					if(ahead->next != 0){
-						printf("Statement 13: ");
 						ahead = ahead->next;
-						printf("&&& NEXT BURST &&& %d, ARRIVAL: %d", ahead->burst, ahead->arrival);
-					}
-				
-					printf("\n");
-					printf("\n");
+					}					
 				}
 			}
-			
-		}
 
-		
+
+		}
 	}else {
 		printf("Nothing in the list\n");
 	}
-	
-}
+}	
 
 /***********************************************************************************************************************************
 ******************************************************** FUNCTIONS *****************************************************************
@@ -669,7 +729,7 @@ void output_algorithm(struct times ** list, int choice, int quanta){
 			printf("************* SHORTEST JOB FIRST (SJF) *************\n\n");
 			printf("Scheduled Jobs\n\n");
 			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
-			sjf_algorithm(list);
+		//	sjf_algorithm(list);
 		break;
 		
 		case 3:
@@ -678,7 +738,7 @@ void output_algorithm(struct times ** list, int choice, int quanta){
 			printf("************* SHORTEST RETURN TIME FIRST (SRT) *************\n\n");
 			printf("Scheduled Jobs\n\n");
 			printf("Process\t\t\tBurst Time\t\t\tStart Time\t\t\tStop Time\n");
-//			srt_algorithm(list);
+			srt_algorithm(list);
 		break;
 		
 		case 4:
@@ -711,7 +771,7 @@ int main(){
 	add_processes(&burstList, 2, 3);
 	add_processes(&burstList, 3, 4);
 	add_processes(&burstList, 1, 5);
-	output_algorithm(&burstList, 2,0);
+	output_algorithm(&burstList, 3,0);
 
 /*
 	printf("Welcome to the Job Scheduler Computer.\nWhat algorithm would you like to use\n");
