@@ -535,7 +535,8 @@ int main(){
 
 	if(check){		
 		// check if algorithm is round robin (RR)
-		if(check == 4){		
+		if(check == 4){
+			return;
 			printf("What is the time quanta for %s scheduling\n", algor);
 			scanf("%d", &quanta);
 		}
@@ -554,9 +555,6 @@ int main(){
 		}
 		
 		output_algorithm(&burstList, check, quanta);
-
-// output the list to check values exist
-//		output_list(&burstList);
 
 	}else {
 		printf("You didn't enter a valid algorithm. Process terminated!\n");		
