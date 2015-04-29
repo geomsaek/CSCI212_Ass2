@@ -541,14 +541,19 @@ int main(){
 		}
 		
 		while(timeRetrieve == 1){
-			printf("Process %d (P%d) – What is the burst time?\n",processCount, processCount);
+			if(processCount <= 63){
+				printf("Process %d (P%d) – What is the burst time?\n",processCount, processCount);
 			
-			scanf("%d", &tempNum);
-			if (!feof(stdin)){
-				add_burst_time(&burstList, tempNum);
+				scanf("%d", &tempNum);
+				if (!feof(stdin)){
+					add_burst_time(&burstList, tempNum);
+				}else {
+					printf("Input terminated\n");
+					timeRetrieve = 0;
+				}
 			}else {
-				printf("Input terminated\n");
 				timeRetrieve = 0;
+				fclose(stdin);
 			}
 			processCount++;
 		}

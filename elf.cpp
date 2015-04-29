@@ -19,9 +19,9 @@
 
 using custnamespace std;
 
-int find_next(char*,int); // finds the next string until ":"
-void copy(char[],char*,int,int); //copies part of one string to other
-bool find_and_put(char[],char[],char*); //resolves libraries with their addresses
+int serach_until(char*,int);
+void cpy_string(char[],char*,int,int);
+bool get_replace(char[],char[],char*);
 
 int main(int argc, char **argv){
 	Elf *elf;
@@ -108,8 +108,8 @@ int main(int argc, char **argv){
 	return 0;
 }
 
-// searches for next occurrence of ":"
-int find_next(char* vals,int start){
+// searches for occurrence of ":"
+int serach_until(char* vals,int start){
 	for(int i = start; i < strlen(vals); i++){
 		if(vals[i] == ':'){
 			return i;
@@ -117,8 +117,8 @@ int find_next(char* vals,int start){
 	}
 }
 
-//copies part of one string to other
-void copy(char array1[],char* array2,int start,int end) {
+// copies two strings
+void cpy_string(char array1[],char* array2,int start,int end) {
 
 	int count = 0;
 	for(int i = start; i < end; i++){
@@ -127,8 +127,8 @@ void copy(char array1[],char* array2,int start,int end) {
 	array1[count] = '\0';
 }
 
-//resolves libraries with their addresses
-bool find_and_put(char complete_list[], char curLib[],char* custname) {
+//connects libraries with address
+bool get_replace(char complete_list[], char curLib[],char* custname) {
 	
 	char path[5000];
 	int start = 0, end = 0, i = 0;
