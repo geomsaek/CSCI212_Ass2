@@ -536,7 +536,6 @@ int main(){
 	if(check){		
 		// check if algorithm is round robin (RR)
 		if(check == 4){
-			return;
 			printf("What is the time quanta for %s scheduling\n", algor);
 			scanf("%d", &quanta);
 		}
