@@ -123,7 +123,8 @@ void cpy_string(char array1[],char* array2,int start,int end) {
 
 	int count = 0;
 	for(int i = start; i < end; i++){
-		array1[count++] = array2[i];
+		array1[count] = array2[i];
+		count++;
 	}
 	array1[count] = '\0';
 }
@@ -165,8 +166,8 @@ bool get_replace(char complete_list[], char curLib[],char* custname) {
 			strcpy(path,getenv("LD_curLib_PATH"));
 			strcat(path,"/");
 			strcat(path,curLib);
-			if(checkfile(path) == 0) //if curLib is resolved, it is copied to the complete_list array
-			{
+			
+			if(checkfile(path) == 0){
 				strcat(complete_list,curLib);
 				strcat(complete_list," =>  ");
 				strcat(path,"\n");
