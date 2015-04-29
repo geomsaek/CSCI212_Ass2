@@ -5,7 +5,7 @@
 *	S #:		3284165
 *	Sub:		CSCI212
 *	Mod:		
-*
+*	Note:		Handles min of 4 processes - BUG
 **/
 
 #include <stdlib.h>
@@ -1115,13 +1115,6 @@ int main(){
 	// value for quanta - RR only
 	int quanta = 0, check = 0, timeRetrieve = 1, processCount = 1, tempNum = 0, tempProcess = 0;
 	struct times * burstList = 0;
-	
-	add_processes(&burstList, 6, 1);
-	add_processes(&burstList, 5, 2);
-	add_processes(&burstList, 2, 4);
-	add_processes(&burstList, 3, 6);
-	add_processes(&burstList, 7, 7);
-	output_algorithm(&burstList, 4,4);
 	
 	printf("Welcome to the Job Scheduler Computer.\nWhat algorithm would you like to use\n");
 	scanf("%s", algor);
