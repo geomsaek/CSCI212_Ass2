@@ -7,6 +7,7 @@
 *	Mod:		
 *
 **/
+
 #include <iostream>
 #include <libfschecker.h>
 #include <cstring>
@@ -91,7 +92,7 @@ int main(int argc, char **argv){
 							}
 							lib[counter] = '\0';
 							count++;
-							if(find_and_put(complete_list,lib,custname) == false) //if by any chance a curLib cannot be found, exit program
+							if(get_replace(complete_list,lib,custname) == false) //if by any chance a curLib cannot be found, exit program
 							{
 								cerr << "Error some of the libraries not found!" << endl;
 								exit(1);
@@ -109,7 +110,7 @@ int main(int argc, char **argv){
 }
 
 // searches for occurrence of ":"
-int serach_until(char* vals,int start){
+int search_until(char* vals,int start){
 	for(int i = start; i < strlen(vals); i++){
 		if(vals[i] == ':'){
 			return i;
@@ -131,20 +132,21 @@ void cpy_string(char array1[],char* array2,int start,int end) {
 bool get_replace(char complete_list[], char curLib[],char* custname) {
 	
 	char path[5000];
-	int start = 0, end = 0, i = 0;
+	int start = 0, end = 0, counter = 0;
 	bool check = false;
 	
 	//first we check a curLib against all the paths
-	while(custname[i] != '\0'){
-		end = find_next(custname,start);
+	while(custname[counter] != '\0'){
+		end = search_until(custname,start);
 
 		if(custname[end] != '0'){
-			copy(path,custname,start,end);
+			cpy_string(path,custname,start,end);
 			start = end + 1;
 			strcat(path,"/");
 			strcat(path,curLib);
-			if(checkfile(path) == 0) //as soon as a curLib is resolved, it is copied to the complete_list array and the loop is broken
-			{
+			
+			// exit loop when library is resolved
+			if(checkfile(path) == 0){
 				strcat(complete_list,curLib);
 				strcat(complete_list," =>  ");
 				strcat(path,"\n");
@@ -154,9 +156,9 @@ bool get_replace(char complete_list[], char curLib[],char* custname) {
 			}
 			strcpy(path,"");
 		}
-		i = end;
+		counter = end;
 	}
-	//if curLib not resolved yet
+	// if end of array has been reached and no library has been found
 	if(check == false){
 		//we look into "LD_curLib_PATH"
 		if(getenv("LD_curLib_PATH") != NULL)  {
@@ -173,14 +175,15 @@ bool get_replace(char complete_list[], char curLib[],char* custname) {
 			}
 		}
 	}
-	//if curLib not resolved yet
+	// if previous test still doesnt link
 	if(check == false) {
 		strcpy(path,"");
 		strcat(path,"/");
-		strcat(path,"usr/lib/"); //we look into /usr/lib
+		
+		// look here
+		strcat(path,"usr/lib/");
 		strcat(path,curLib);
-		if(checkfile(path) == 0) //if curLib is resolved in /usr/lib, it is copied to the complete_list array
-		{
+		if(checkfile(path) == 0){
 			strcat(complete_list,curLib);
 			strcat(complete_list," =>  ");
 			strcat(path,"\n");
@@ -189,5 +192,6 @@ bool get_replace(char complete_list[], char curLib[],char* custname) {
 		}
 	}
 
-	return check; //if not resolved any where, false is returned. Else true is returned
+	// return status
+	return check;
 }

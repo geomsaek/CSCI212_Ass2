@@ -5,7 +5,7 @@
 *	S #:		3284165
 *	Sub:		CSCI212
 *	Mod:		
-*
+*	Note:		Handles min of 4 processes - BUG
 **/
 
 #include <stdlib.h>
