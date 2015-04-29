@@ -20,7 +20,8 @@
 
 using custnamespace std;
 
-int serach_until(char*,int);
+bool check_paths(char* custname);
+int search_until(char*,int);
 void cpy_string(char[],char*,int,int);
 bool get_replace(char[],char[],char*);
 
@@ -66,8 +67,7 @@ int main(int argc, char **argv){
 			do
 			{	
 				gelf_getdyn(data, ii++, &sym);
-				if (sym.d_tag == DT_NEEDED)
-				{
+				if (sym.d_tag == DT_NEEDED){
 					// if we find a element in the section
 					// that is a curLib we pull it out
 					custname = elf_strptr(elf,shdr.sh_link,sym.d_un.d_ptr);
@@ -84,16 +84,18 @@ int main(int argc, char **argv){
 						char complete_list[5000];
 						char lib[100];
 						int count = 0;
-						for(int i = 0; i < lib_count; i++) //for each curLib, resolve its address
-						{
+						//for each curLib, resolve its address
+						
+						for(int i = 0; i < lib_count; i++) {
 							int counter = 0;
 							while(curLib[count] != ':'){
 								lib[counter++] = curLib[count++];
 							}
 							lib[counter] = '\0';
 							count++;
-							if(get_replace(complete_list,lib,custname) == false) //if by any chance a curLib cannot be found, exit program
-							{
+							
+							//if by any chance a curLib cannot be found, exit program
+							if(get_replace(complete_list,lib,custname) == false){
 								cerr << "Error some of the libraries not found!" << endl;
 								exit(1);
 							}
@@ -129,14 +131,14 @@ void cpy_string(char array1[],char* array2,int start,int end) {
 	array1[count] = '\0';
 }
 
-//connects libraries with address
-bool get_replace(char complete_list[], char curLib[],char* custname) {
-	
-	char path[5000];
+// checks initial path
+bool check_paths(char* custname){
+
+	//first we check a curLib against all the paths
 	int start = 0, end = 0, counter = 0;
 	bool check = false;
+	char path[5000];
 	
-	//first we check a curLib against all the paths
 	while(custname[counter] != '\0'){
 		end = search_until(custname,start);
 
@@ -159,6 +161,19 @@ bool get_replace(char complete_list[], char curLib[],char* custname) {
 		}
 		counter = end;
 	}
+	
+	return check;
+
+}
+
+//connects libraries with address
+bool get_replace(char complete_list[], char curLib[],char* custname) {
+	
+	char path[5000];
+	bool check;
+	
+	check = check_paths(custname);
+	
 	// if end of array has been reached and no library has been found
 	if(check == false){
 		//we look into "LD_curLib_PATH"
